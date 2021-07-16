@@ -21,6 +21,29 @@ function ProfileSidebar(propriedades) {
   )
 }
 
+function ProfileRelationsBox(propriedades) {
+  return(
+    <ProfileRelationsBoxWrapper>
+      <h2 className="smallTitle">
+        {propriedades.title} ({propriedades.itens.length})
+      </h2>
+
+      <ul>
+        {pessoasFavoritas.map((itemAtual) => {
+          return (
+            <li key={itemAtual}>
+              <a href={`/users/${itemAtual}`} key={itemAtual}>
+                <img src={`https://github.com/${itemAtual}.png`} />
+                <span>{itemAtual}</span>
+              </a>
+            </li>
+          )
+        })}
+      </ul>
+    </ProfileRelationsBoxWrapper>
+  )
+}
+
 export default function Home() {
   const usuarioAleatorio = 'omariosouto'
   const [comunidades, setComunidades] = React.useState([{
@@ -38,6 +61,16 @@ export default function Home() {
     'marcobrunodev',
     'felipefialho'
   ]
+  const [seguidores, setSeguidores] = React.useState([]);
+  React.useEffect(function() {
+    fetch('https://api.github.com/users/peas/followers')
+     .then(function(respostaDoServidor) {
+        return respostaDoServidor.json();
+    })
+      .then(function(respostaCompleta){
+        sertSeguidores(respostaCompleta);
+     })
+  }, [])
 
   return (
     <>
@@ -60,8 +93,6 @@ export default function Home() {
             <form onSubmit={function handleCriaComunidade(e) {
                 e.preventDefault();
                 const dadosDoForm = new FormData(e.target);
-
-
 
                 const comunidade = {
                   id: new Date().toISOString,
@@ -114,24 +145,26 @@ export default function Home() {
             </ul>
           </ProfileRelationsBoxWrapper>
 
-          <ProfileRelationsBoxWrapper>
+        <ProfileRelationsBoxWrapper>
             <h2 className="smallTitle">
-              Pessoas da comunidade ({pessoasFavoritas.length})
+              Comunidades ({comunidades.length})
             </h2>
 
             <ul>
-              {pessoasFavoritas.map((itemAtual) => {
+              {comunidades.map((itemAtual) => {
                 return (
-                  <li key={itemAtual}>
-                    <a href={`/users/${itemAtual}`} key={itemAtual}>
-                      <img src={`https://github.com/${itemAtual}.png`} />
-                      <span>{itemAtual}</span>
+                  <li key={itemAtual.id}>
+                    <a href={`/users/${itemAtual.title}`} key={itemAtual.title}>
+                      <img src={itemAtual.image} />
+                      <span>{itemAtual.title}</span>
                     </a>
                   </li>
                 )
               })}
             </ul>
           </ProfileRelationsBoxWrapper>
+          <ProfileRelationsBox title="Seguidores" itens={seguidores}/>
+          
         </div>
       </MainGrid>
     </>
